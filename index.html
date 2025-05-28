@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC 2026 Countdown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Light Mode styles (default) */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            color: #2d3748; /* Default text color */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .timer-card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .timer-card:hover {
+            transform: translateY(-5px);
+        }
+        .timer-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #2c5282; /* Dark blue */
+            margin-bottom: 0.5rem;
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+            transition: color 0.3s ease;
+        }
+        .timer-label {
+            font-size: 0.9rem;
+            color: #4a5568; /* Gray */
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .red-timer .timer-value, .red-timer .timer-label {
+            color: #e53e3e; /* Red for approaching deadline */
+        }
+        .motivation-card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 150px;
+            border: 2px solid #a7d9e8;
+            background: linear-gradient(145deg, #e0f2f7, #ffffff);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .motivation-text {
+            font-size: 1.25rem;
+            font-style: italic;
+            color: #2d3748;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+        .current-date-time {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .header-title {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .encouragement-message {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #38a169;
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #d4edda;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .inactive-card {
+            opacity: 0.6;
+            pointer-events: none;
+            transform: none;
+            box-shadow: none;
+        }
+        .exam-date {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+        .form-dates {
+            font-size: 0.85rem;
+            color: #4a5568;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .application-details {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c5282;
+            margin-top: 1rem;
+            transition: color 0.3s ease;
+        }
+        .submission-date-display {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-top: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+            transition: background-color 0.3s ease;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            animation: slideIn 0.3s forwards;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .modal-content p {
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .modal-buttons button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            border: none;
+        }
+        .modal-buttons button:active {
+            transform: scale(0.98);
+        }
+        .btn-yes {
+            background-color: #38a169;
+            color: white;
+            margin-right: 1rem;
+        }
+        .btn-yes:hover {
+            background-color: #2f855a;
+        }
+        .btn-no {
+            background-color: #e53e3e;
+            color: white;
+        }
+        .btn-no:hover {
+            background-color: #c53030;
+        }
+        .modal-input {
+            width: calc(100% - 2rem);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .modal-error {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Dark Mode styles */
+        body.dark-mode {
+            background-color: #0d1117; /* Very dark background */
+            color: #c9d1d9; /* Light text for contrast */
+        }
+
+        body.dark-mode .timer-card,
+        body.dark-mode .motivation-card {
+            background-color: #161b22; /* Darker card background */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+            border-color: #30363d; /* Darker border */
+        }
+
+        body.dark-mode .timer-value {
+            color: #58a6ff; /* Vibrant blue for timer numbers */
+        }
+
+        body.dark-mode .timer-label,
+        body.dark-mode .exam-date,
+        body.dark-mode .form-dates,
+        body.dark-mode .motivation-text,
+        body.dark-mode .application-details,
+        body.dark-mode .submission-date-display,
+        body.dark-mode #formCardTitle {
+            color: #8b949e; /* Muted light gray text */
+        }
+
+        body.dark-mode .red-timer .timer-value,
+        body.dark-mode .red-timer .timer-label {
+            color: #f85149; /* Brighter red for dark mode */
+        }
+
+        body.dark-mode .encouragement-message {
+            background-color: #238636; /* Darker green background */
+            color: #c9d1d9; /* Light text */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.9); /* More opaque overlay for dark mode */
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #161b22;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        body.dark-mode .modal-content p {
+            color: #c9d1d9;
+        }
+
+        body.dark-mode .modal-input {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            border-color: #30363d;
+        }
+
+        body.dark-mode .modal-input::placeholder {
+            color: #8b949e;
+        }
+
+        body.dark-mode .modal-error {
+            color: #f85149;
+        }
+
+        body.dark-mode .btn-yes {
+            background-color: #238636;
+        }
+        body.dark-mode .btn-yes:hover {
+            background-color: #2ea043;
+        }
+        body.dark-mode .btn-no {
+            background-color: #f85149;
+        }
+        body.dark-mode .btn-no:hover {
+            background-color: #e53e3e;
+        }
+
+        /* Sliding Toggle Switch Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc; /* Light mode background */
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3; /* Blue for dark mode */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Dark mode specific slider styles */
+        body.dark-mode .slider {
+            background-color: #555; /* Darker background for dark mode slider */
+        }
+
+        body.dark-mode input:checked + .slider {
+            background-color: #58a6ff; /* Vibrant blue for dark mode active slider */
+        }
+
+        body.dark-mode .slider:before {
+            background-color: #c9d1d9; /* Lighter knob for dark mode */
+        }
+
+
+        /* Keyframe for pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.03);
+                opacity: 0.9;
+            }
+        }
+        /* Keyframe for modal slide-in */
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .timer-value {
+                font-size: 2rem;
+            }
+            .timer-label {
+                font-size: 0.8rem;
+            }
+            .motivation-text {
+                font-size: 1rem;
+            }
+            .current-date-time {
+                font-size: 0.9rem;
+            }
+            .encouragement-message {
+                font-size: 1rem;
+            }
+            .exam-date {
+                font-size: 0.8rem;
+            }
+            .form-dates {
+                font-size: 0.8rem;
+            }
+            .application-details {
+                font-size: 1rem;
+            }
+            .submission-date-display {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="">
+    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold mb-2 md:mb-0 header-title">UPSC 2026 Exam Countdown</h1>
+            <div class="flex items-center space-x-4">
+                <div id="currentDateTime" class="current-date-time"></div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-white text-sm font-semibold">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div id="formTimerCard" class="timer-card">
+            <h2 id="formCardTitle" class="text-xl font-semibold mb-2 text-gray-700">UPSC Form Fill-up Deadline</h2>
+            <div id="formDatesDisplay" class="form-dates"></div>
+            <div id="formCountdownDisplay">
+                <div class="flex justify-center items-center space-x-2 md:space-x-4 mb-4">
+                    <div>
+                        <div id="formDays" class="timer-value">00</div>
+                        <div class="timer-label">Days</div>
+                    </div>
+                    <div>
+                        <div id="formHours" class="timer-value">00</div>
+                        <div class="timer-label">Hours</div>
+                    </div>
+                    <div>
+                        <div id="formMinutes" class="timer-value">00</div>
+                        <div class="timer-label">Minutes</div>
+                    </div>
+                    <div>
+                        <div id="formSeconds" class="timer-value">00</div>
+                        <div class="timer-label">Seconds</div>
+                    </div>
+                </div>
+            </div>
+            <div id="formSubmittedMessage" class="text-lg font-medium text-green-600 hidden">Form Submitted Successfully!!!</div>
+            <div id="applicationNumberDisplay" class="application-details hidden"></div>
+            <div id="submissionDateDisplay" class="submission-date-display hidden"></div>
+            <div id="formCheckboxContainer" class="flex items-center justify-center mt-auto hidden">
+                <input type="checkbox" id="formFilledCheckbox" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                <label for="formFilledCheckbox" class="ml-2 text-gray-700 select-none">I have filled the form</label>
+            </div>
+        </div>
+
+        <div id="preTimerCard" class="timer-card">
+            <h2 class="text-xl font-semibold text-gray-700">UPSC Prelims Exam</h2>
+            <div id="prelimsExamDateDisplay" class="exam-date"></div>
+            <div class="flex justify-center items-center space-x-2 md:space-x-4">
+                <div>
+                    <div id="preDays" class="timer-value">00</div>
+                    <div class="timer-label">Days</div>
+                </div>
+                <div>
+                    <div id="preHours" class="timer-value">00</div>
+                    <div class="timer-label">Hours</div>
+                </div>
+                <div>
+                    <div id="preMinutes" class="timer-value">00</div>
+                    <div class="timer-label">Minutes</div>
+                </div>
+                <div>
+                    <div id="preSeconds" class="timer-value">00</div>
+                    <div class="timer-label">Seconds</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mainsTimerCard" class="timer-card">
+            <h2 class="text-xl font-semibold text-gray-700">UPSC Mains Exam</h2>
+            <div id="mainsExamDateDisplay" class="exam-date"></div>
+            <div class="flex justify-center items-center space-x-2 md:space-x-4">
+                <div>
+                    <div id="mainsDays" class="timer-value">00</div>
+                    <div class="timer-label">Days</div>
+                </div>
+                <div>
+                    <div id="mainsHours" class="timer-value">00</div>
+                    <div class="timer-label">Hours</div>
+                </div>
+                <div>
+                    <div id="mainsMinutes" class="timer-value">00</div>
+                    <div class="timer-label">Minutes</div>
+                </div>
+                <div>
+                    <div id="mainsSeconds" class="timer-value">00</div>
+                    <div class="timer-label">Seconds</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 encouragement-message">
+            <p>Every second counts! Stay focused, stay determined, and make your dreams a reality.</p>
+        </div>
+
+        <div class="lg:col-span-3 motivation-card">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Daily Motivation</h2>
+            <p id="motivationQuote" class="motivation-text"></p>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center text-sm">
+        <p>&copy; 2025 UPSC Countdown. All rights reserved.</p>
+    </footer>
+
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <p id="modalQuestion">Have you filled the form?</p>
+            <input type="text" id="applicationNumberInput" class="modal-input hidden" placeholder="Enter 11-digit Application Number">
+            <div id="modalError" class="modal-error hidden"></div>
+            <div class="modal-buttons">
+                <button id="confirmYes" class="btn-yes">Yes</button>
+                <button id="confirmNo" class="btn-no">No</button>
+                <button id="submitApplicationNumber" class="btn-yes hidden">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define target dates for UPSC 2026 (Estimates)
+        const formFillupStartDate = new Date('2026-01-14T12:00:00'); // Updated for testing
+        const formFillupEndDate = new Date('2026-02-03T18:00:00');
+        const prelimsExamDate = new Date('2026-05-24T09:30:00');
+        const mainsExamDate = new Date('2026-08-21T09:30:00');
+
+        // Motivational quotes (add more for variety)
+        const motivationalQuotes = [
+            "The future belongs to those who believe in the beauty of their dreams.",
+            "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+            "Believe you can and you're halfway there.",
+            "The only way to do great work is to love what you do.",
+            "Don't watch the clock; do what it does. Keep going.",
+            "The best way to predict the future is to create it.",
+            "Your time is limited, don't waste it living someone else's life.",
+            "It does not matter how slowly you go as long as you do not stop.",
+            "The journey of a thousand miles begins with a single step.",
+            "Push yourself, because no one else is going to do it for you.",
+            "The mind is everything. What you think you become.",
+            "Strive not to be a success, but rather to be of value.",
+            "The only limit to our realization of tomorrow will be our doubts of today.",
+            "You are never too old to set another goal or to dream a new dream.",
+            "The harder you work for something, the greater you'll feel when you achieve it."
+        ];
+
+        // Get DOM elements
+        const currentDateTimeDisplay = document.getElementById('currentDateTime');
+        const formTimerCard = document.getElementById('formTimerCard');
+        const formCardTitle = document.getElementById('formCardTitle');
+        const formDays = document.getElementById('formDays');
+        const formHours = document.getElementById('formHours');
+        const formMinutes = document.getElementById('formMinutes');
+        const formSeconds = document.getElementById('formSeconds');
+        const formFilledCheckbox = document.getElementById('formFilledCheckbox');
+        const formStatusMessage = document.getElementById('formSubmittedMessage');
+        const formCheckboxContainer = document.getElementById('formCheckboxContainer');
+        const formDatesDisplay = document.getElementById('formDatesDisplay');
+        const formCountdownDisplay = document.getElementById('formCountdownDisplay');
+        const applicationNumberDisplay = document.getElementById('applicationNumberDisplay');
+        const submissionDateDisplay = document.getElementById('submissionDateDisplay');
+
+        const preTimerCard = document.getElementById('preTimerCard');
+        const preDays = document.getElementById('preDays');
+        const preHours = document.getElementById('preHours');
+        const preMinutes = document.getElementById('preMinutes');
+        const preSeconds = document.getElementById('preSeconds');
+        const prelimsExamDateDisplay = document.getElementById('prelimsExamDateDisplay');
+
+        const mainsTimerCard = document.getElementById('mainsTimerCard');
+        const mainsDays = document.getElementById('mainsDays');
+        const mainsHours = document.getElementById('mainsHours');
+        const mainsMinutes = document.getElementById('mainsMinutes');
+        const mainsSeconds = document.getElementById('mainsSeconds');
+        const mainsExamDateDisplay = document.getElementById('mainsExamDateDisplay');
+
+        const motivationQuoteDisplay = document.getElementById('motivationQuote');
+
+        // Modal elements
+        const confirmationModal = document.getElementById('confirmationModal');
+        const modalQuestion = document.getElementById('modalQuestion');
+        const applicationNumberInput = document.getElementById('applicationNumberInput');
+        const modalError = document.getElementById('modalError');
+        const confirmYesBtn = document.getElementById('confirmYes');
+        const confirmNoBtn = document.getElementById('confirmNo');
+        const submitApplicationNumberBtn = document.getElementById('submitApplicationNumber');
+
+        // Dark Mode elements
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        let formTimerInterval;
+        let preTimerInterval;
+        let mainsTimerInterval;
+
+
+        /**
+         * Formats a number to always have two digits (e.g., 5 -> "05").
+         * @param {number} num The number to format.
+         * @returns {string} The formatted number.
+         */
+        function formatTwoDigits(num) {
+            return num < 10 ? '0' + num : num;
+        }
+
+        /**
+         * Updates the current date, day, and time in the header.
+         */
+        function updateCurrentDateTime() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            currentDateTimeDisplay.textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        /**
+         * Calculates and displays the countdown for a given target date.
+         * @param {Date} targetDate The date to count down to.
+         * @param {HTMLElement} daysElement The HTML element for days.
+         * @param {HTMLElement} hoursElement The HTML element for hours.
+         * @param {HTMLElement} minutesElement The HTML element for minutes.
+         * @param {HTMLElement} secondsElement The HTML element for seconds.
+         * @param {HTMLElement} cardElement The timer card element to apply styles (red/inactive).
+         * @param {string} timerType A string to identify the timer (e.g., 'prelims', 'mains').
+         * @returns {number} The remaining time in milliseconds.
+         */
+        function updateCountdown(targetDate, daysElement, hoursElement, minutesElement, secondsElement, cardElement, timerType) {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+
+            if (distance < 0) {
+                daysElement.textContent = "00";
+                hoursElement.textContent = "00";
+                minutesElement.textContent = "00";
+                secondsElement.textContent = "00";
+                cardElement.classList.add('inactive-card');
+                cardElement.classList.remove('red-timer');
+                if (timerType === 'prelims') {
+                    clearInterval(preTimerInterval);
+                    console.log('Prelims timer stopped: Exam passed.');
+                } else if (timerType === 'mains') {
+                    clearInterval(mainsTimerInterval);
+                    console.log('Mains timer stopped: Exam passed.');
+                } else if (timerType === 'form') {
+                    clearInterval(formTimerInterval);
+                    console.log('Form timer stopped: Deadline passed.');
+                }
+                return 0;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            daysElement.textContent = formatTwoDigits(days);
+            hoursElement.textContent = formatTwoDigits(hours);
+            minutesElement.textContent = formatTwoDigits(minutes);
+            secondsElement.textContent = formatTwoDigits(seconds);
+
+            if (timerType === 'prelims' && days <= 15) {
+                cardElement.classList.add('red-timer');
+            } else if (timerType === 'form' && days <= 7) {
+                cardElement.classList.add('red-timer');
+            }
+            else {
+                cardElement.classList.remove('red-timer');
+            }
+
+            return distance;
+        }
+
+        /**
+         * Inactivates the form timer card and displays "Form Submitted Successfully!!!" message with application number and submission date.
+         * @param {string} appNumber The application number to display.
+         * @param {string} submissionDate The formatted submission date to display.
+         */
+        function inactivateFormTimerCard(appNumber, submissionDate) {
+            clearInterval(formTimerInterval);
+            formCardTitle.classList.add('hidden');
+            formCountdownDisplay.classList.add('hidden');
+            formDatesDisplay.classList.add('hidden');
+            formCheckboxContainer.classList.add('hidden');
+
+            formStatusMessage.classList.remove('hidden');
+            formStatusMessage.textContent = "Form Submitted Successfully!!!";
+            applicationNumberDisplay.textContent = `Application No.: ${appNumber}`;
+            applicationNumberDisplay.classList.remove('hidden');
+            submissionDateDisplay.textContent = `Submission date: ${submissionDate}`;
+            submissionDateDisplay.classList.remove('hidden');
+
+            formTimerCard.classList.remove('red-timer');
+            formTimerCard.classList.add('inactive-card');
+            formFilledCheckbox.disabled = true;
+            console.log('Form timer inactivated: Form Filled with App No:', appNumber, 'on', submissionDate);
+        }
+
+        /**
+         * Resets the form timer card to its active state.
+         */
+        function activateFormTimerCard() {
+            localStorage.removeItem('formFilled');
+            localStorage.removeItem('applicationNumber');
+            localStorage.removeItem('submissionDate');
+
+            formCardTitle.classList.remove('hidden');
+            formStatusMessage.classList.add('hidden');
+            applicationNumberDisplay.classList.add('hidden');
+            submissionDateDisplay.classList.add('hidden');
+
+            formTimerCard.classList.remove('inactive-card');
+            formTimerCard.classList.remove('red-timer');
+            formFilledCheckbox.checked = false;
+            formFilledCheckbox.disabled = false;
+            formCountdownDisplay.classList.remove('hidden');
+            formDatesDisplay.classList.remove('hidden');
+
+            if (new Date().getTime() < formFillupEndDate.getTime()) {
+                formTimerInterval = setInterval(updateFormCountdown, 1000);
+            }
+            console.log('Form timer reactivated.');
+        }
+
+
+        /**
+         * Handles the form fill-up timer logic, including color change, checkbox visibility, and inactivation.
+         */
+        function updateFormCountdown() {
+            const now = new Date();
+            const distanceToFormEnd = formFillupEndDate.getTime() - now.getTime();
+            const distanceToFormStart = formFillupStartDate.getTime() - now.getTime();
+
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            formDatesDisplay.textContent = `Starts: ${formFillupStartDate.toLocaleDateString('en-US', options)} | Ends: ${formFillupEndDate.toLocaleDateString('en-US', options)}`;
+
+            const isFormFilled = localStorage.getItem('formFilled') === 'true';
+            const storedAppNumber = localStorage.getItem('applicationNumber');
+            const storedSubmissionDate = localStorage.getItem('submissionDate');
+
+            if (isFormFilled && storedAppNumber && storedSubmissionDate) {
+                inactivateFormTimerCard(storedAppNumber, storedSubmissionDate);
+                return;
+            } else {
+                formTimerCard.classList.remove('inactive-card');
+                formFilledCheckbox.disabled = false;
+                formCardTitle.classList.remove('hidden');
+                formCountdownDisplay.classList.remove('hidden');
+                formDatesDisplay.classList.remove('hidden');
+                formStatusMessage.classList.add('hidden');
+                applicationNumberDisplay.classList.add('hidden');
+                submissionDateDisplay.classList.add('hidden');
+            }
+
+            if (distanceToFormStart > 0) {
+                formTimerCard.classList.remove('red-timer');
+                formStatusMessage.classList.remove('hidden');
+                formStatusMessage.textContent = `Countdown to Form Opening:`;
+                formCheckboxContainer.classList.add('hidden');
+
+                const days = Math.floor(distanceToFormStart / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distanceToFormStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distanceToFormStart % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distanceToFormStart % (1000 * 60)) / 1000);
+
+                formDays.textContent = formatTwoDigits(days);
+                formHours.textContent = formatTwoDigits(hours);
+                formMinutes.textContent = formatTwoDigits(minutes);
+                formSeconds.textContent = formatTwoDigits(seconds);
+                console.log('Form timer: Counting down to start date.');
+                return;
+            }
+
+            if (distanceToFormEnd > 0) {
+                formStatusMessage.classList.add('hidden');
+                formCheckboxContainer.classList.remove('hidden');
+
+                const remainingDays = Math.floor(distanceToFormEnd / (1000 * 60 * 60 * 24));
+                if (remainingDays <= 7) {
+                    formTimerCard.classList.add('red-timer');
+                } else {
+                    formTimerCard.classList.remove('red-timer');
+                }
+                updateCountdown(formFillupEndDate, formDays, formHours, formMinutes, formSeconds, formTimerCard, 'form');
+                console.log('Form timer: Counting down to deadline.');
+                return;
+            }
+
+            clearInterval(formTimerInterval);
+            formDays.textContent = "00";
+            formHours.textContent = "00";
+            formMinutes.textContent = "00";
+            formSeconds.textContent = "00";
+            formStatusMessage.textContent = "Form submission period has ended.";
+            formStatusMessage.classList.remove('hidden');
+            formTimerCard.classList.remove('red-timer');
+            formCheckboxContainer.classList.add('hidden');
+            formTimerCard.classList.add('inactive-card');
+            console.log('Form timer inactivated: Period ended.');
+        }
+
+        /**
+         * Displays a daily motivational quote.
+         */
+        function displayDailyMotivation() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const quoteIndex = dayOfYear % motivationalQuotes.length;
+            motivationQuoteDisplay.textContent = `"${motivationalQuotes[quoteIndex]}"`;
+        }
+
+        /**
+         * Displays the exam dates for Prelims and Mains.
+         */
+        function displayExamDates() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            prelimsExamDateDisplay.textContent = `Date: ${prelimsExamDate.toLocaleDateString('en-US', options)}`;
+            mainsExamDateDisplay.textContent = `Date: ${mainsExamDate.toLocaleDateString('en-US', options)}`;
+        }
+
+        // --- Modal Functions ---
+        function showModal() {
+            confirmationModal.classList.remove('hidden');
+            modalQuestion.textContent = "Have you filled the form?";
+            confirmYesBtn.classList.remove('hidden');
+            confirmNoBtn.classList.remove('hidden');
+            applicationNumberInput.classList.add('hidden');
+            submitApplicationNumberBtn.classList.add('hidden');
+            modalError.classList.add('hidden');
+            applicationNumberInput.value = '';
+        }
+
+        function hideModal() {
+            confirmationModal.classList.add('hidden');
+        }
+
+        // Event listener for the form filled checkbox
+        formFilledCheckbox.addEventListener('change', function(event) {
+            event.preventDefault();
+            showModal();
+        });
+
+        // Event listener for "Yes" button in the first modal
+        confirmYesBtn.onclick = () => {
+            modalQuestion.textContent = "Enter Application Number:";
+            confirmYesBtn.classList.add('hidden');
+            confirmNoBtn.classList.add('hidden');
+            applicationNumberInput.classList.remove('hidden');
+            submitApplicationNumberBtn.classList.remove('hidden');
+            modalError.classList.add('hidden');
+        };
+
+        // Event listener for "No" button in the first modal
+        confirmNoBtn.onclick = () => {
+            formFilledCheckbox.checked = false;
+            hideModal();
+        };
+
+        // Event listener for "Submit Application Number" button
+        submitApplicationNumberBtn.onclick = () => {
+            const appNumber = applicationNumberInput.value.trim();
+            const elevenDigitsRegex = /^\d{11}$/;
+
+            if (elevenDigitsRegex.test(appNumber)) {
+                const now = new Date();
+                const submissionDateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                const formattedSubmissionDate = now.toLocaleDateString('en-US', submissionDateOptions);
+
+                localStorage.setItem('formFilled', 'true');
+                localStorage.setItem('applicationNumber', appNumber);
+                localStorage.setItem('submissionDate', formattedSubmissionDate);
+                formFilledCheckbox.checked = true;
+                inactivateFormTimerCard(appNumber, formattedSubmissionDate);
+                hideModal();
+            } else {
+                modalError.textContent = "Please enter a valid 11-digit number.";
+                modalError.classList.remove('hidden');
+            }
+        };
+
+        // --- Dark Mode Logic ---
+        function applyDarkModePreference() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                darkModeToggle.checked = true; // Set toggle to checked if dark mode is enabled
+            } else {
+                body.classList.remove('dark-mode');
+                darkModeToggle.checked = false; // Set toggle to unchecked if dark mode is disabled
+            }
+        }
+
+        darkModeToggle.addEventListener('change', () => { // Changed to 'change' event for checkbox
+            if (darkModeToggle.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Initial calls to set up the display
+        updateCurrentDateTime();
+        displayDailyMotivation();
+        updateFormCountdown();
+        displayExamDates();
+        applyDarkModePreference(); // Apply dark mode on initial load
+
+        // Set intervals for continuous updates
+        setInterval(updateCurrentDateTime, 1000);
+        preTimerInterval = setInterval(() => updateCountdown(prelimsExamDate, preDays, preHours, preMinutes, preSeconds, preTimerCard, 'prelims'), 1000);
+        mainsTimerInterval = setInterval(() => updateCountdown(mainsExamDate, mainsDays, mainsHours, mainsMinutes, mainsSeconds, mainsTimerCard, 'mains'), 1000);
+
+        if (localStorage.getItem('formFilled') !== 'true' && new Date().getTime() < formFillupEndDate.getTime()) {
+            formTimerInterval = setInterval(updateFormCountdown, 1000);
+        }
+    </script>
+</body>
+</html>
